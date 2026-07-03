@@ -53,6 +53,8 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 #d-name{color:#EDE7D6;font-size:19px;font-weight:bold;margin-top:3px}
 #d-meta{color:#8A8F9E;font-size:11px;margin-bottom:3px}
 #d-summary{color:#C9CCD6;font-size:12px;line-height:1.75;margin-top:7px}
+#d-wiki{display:inline-flex;align-items:center;gap:5px;margin-top:11px;color:#4FC3E8;font-size:11.5px;text-decoration:none;border:1px solid #2A4A5A;border-radius:8px;padding:5px 10px;transition:background .15s}
+#d-wiki:hover{background:rgba(79,195,232,.12)}
 #d-rel-title{color:#8A8F9E;font-size:10px;margin-top:13px;margin-bottom:5px}
 #d-rels{display:flex;flex-direction:column;gap:5px}
 .rel-row{background:rgba(255,255,255,.03);border:1px solid #232838;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;width:100%}
@@ -135,6 +137,7 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
   <div id="d-name"></div>
   <div id="d-meta"></div>
   <p id="d-summary"></p>
+  <a id="d-wiki" target="_blank" rel="noopener noreferrer"></a>
   <div id="d-rel-title"></div>
   <div id="d-rels"></div>
 </div>
@@ -526,6 +529,7 @@ function eraLabel(era){if(lang==='ja')return era.ja;if(lang==='en')return era.en
 //  STATE
 // ───────────────────────────────────────────────
 let lang='en';
+let introDone=false;
 let selectedId=null, hoveredId=null, searchQ='';
 let legendOpen = window.innerWidth>640;
 const enabledEras=new Set(ERAS.map(e=>e.id));
@@ -546,7 +550,7 @@ fm.append('feMergeNode').attr('in','SourceGraphic');
 
 const g=svg.append('g');
 
-const zoom=d3.zoom().scaleExtent([0.2,4]).on('zoom',ev=>{
+const zoom=d3.zoom().scaleExtent([0.004,4]).on('zoom',ev=>{
   g.attr('transform',ev.transform);
   document.getElementById('zoom-pct').textContent=Math.round(ev.transform.k*100)+'%';
 });
@@ -563,6 +567,8 @@ const sim=d3.forceSimulation(nodes)
   .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>d.type==='teacher'?60:95).strength(0.45))
   .force('charge',d3.forceManyBody().strength(-200))
   .force('center',d3.forceCenter(W()/2,H()/2))
+  .force('x',d3.forceX(W()/2).strength(0.045))
+  .force('y',d3.forceY(H()/2).strength(0.045))
   .force('collision',d3.forceCollide().radius(d=>8+(degree[d.id]||0)*1.2+22));
 
 const linkSel=g.append('g').selectAll('line').data(links).join('line')
@@ -599,9 +605,9 @@ function render(){
 }
 sim.on('tick',render);
 
-// Fit the whole graph (nodes + labels) into the viewport, edge to edge.
-function fitToView(pad,dur){
-  if(!nodes.length)return;
+// Compute the transform that fits the whole graph (nodes + labels) into the viewport.
+function fitTransform(pad){
+  if(!nodes.length)return null;
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   nodes.forEach(d=>{
     const r=5+(degree[d.id]||0)*1.15;
@@ -612,12 +618,28 @@ function fitToView(pad,dur){
     if(d.y+r>maxY)maxY=d.y+r;
   });
   const gw=maxX-minX,gh=maxY-minY;
-  if(gw<=0||gh<=0)return;
+  if(gw<=0||gh<=0)return null;
   const scale=Math.max(0.2,Math.min((W()-pad*2)/gw,(H()-pad*2)/gh,4));
   const tx=W()/2-scale*(minX+maxX)/2;
   const ty=H()/2-scale*(minY+maxY)/2;
-  const t=d3.zoomIdentity.translate(tx,ty).scale(scale);
+  return d3.zoomIdentity.translate(tx,ty).scale(scale);
+}
+
+function fitToView(pad,dur){
+  const t=fitTransform(pad);
+  if(!t)return;
   (dur?svg.transition().duration(dur):svg).call(zoom.transform,t);
+}
+
+// Entrance animation: start zoomed out, then rush in to the fitted view.
+function introZoom(pad){
+  const t=fitTransform(pad);
+  if(!t)return;
+  const s0=Math.max(0.004,t.k*0.01);           // starting scale = 1% of the fitted scale
+  const cx=(W()/2-t.x)/t.k, cy=(H()/2-t.y)/t.k; // graph centre in data coords
+  const start=d3.zoomIdentity.translate(W()/2-s0*cx,H()/2-s0*cy).scale(s0);
+  svg.call(zoom.transform,start);
+  svg.transition().duration(850).ease(d3.easeExpOut).call(zoom.transform,t);
 }
 
 // ───────────────────────────────────────────────
@@ -643,6 +665,7 @@ function updateOpacity(){
   });
 }
 
+const WIKI_LABEL={en:'View on Wikipedia',ja:'Wikipediaで見る',zh:'在维基百科上查看',ko:'위키백과에서 보기',es:'Ver en Wikipedia',fr:'Voir sur Wikipédia',pt:'Ver na Wikipédia'};
 function updateDetail(){
   const panel=document.getElementById('detail');
   if(!selectedId){panel.classList.remove('open');return;}
@@ -654,6 +677,9 @@ function updateDetail(){
   document.getElementById('d-name').textContent=localName;
   document.getElementById('d-meta').textContent=localName===n.en?n.en+' · '+n.life:localName+' ('+n.en+') · '+n.life;
   document.getElementById('d-summary').textContent=nodeSummary(n);
+  const wiki=document.getElementById('d-wiki');
+  wiki.href='https://'+lang+'.wikipedia.org/w/index.php?title=Special:Search&search='+encodeURIComponent(nodeName(n))+'&go=Go';
+  wiki.textContent=(WIKI_LABEL[lang]||'Wikipedia')+' ↗';
   const conns=EDGES.filter(e=>e.source===selectedId||e.target===selectedId);
   document.getElementById('d-rel-title').textContent=s.relTitle(conns.length);
   const relsEl=document.getElementById('d-rels');
@@ -753,7 +779,7 @@ document.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('resize',()=>{
-  fitToView(70,0);
+  if(introDone)fitToView(70,0);
 });
 
 // ── Init ────────────────────────────────────────
@@ -763,7 +789,8 @@ for(let i=0;i<400;i++)sim.tick();
 sim.stop();
 render();
 applyStrings();
-fitToView(70,0);
+introZoom(70);
+setTimeout(()=>{introDone=true;},820);
 </script>
 </body>
 </html>
