@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>哲学者カオスマップ / Philosopher Map</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:none;background:#0A0D14}
+#app{position:relative;width:100vw;height:100vh;background:radial-gradient(ellipse at 50% 30%,#131826 0%,#0A0D14 65%)}
+#graph{width:100%;height:100%;display:block;touch-action:none}
+
+/* ── Title ── */
+#title{position:absolute;top:14px;left:14px;pointer-events:none}
+#title h1{color:#EDE7D6;font-size:17px;letter-spacing:.05em}
+#title p{color:#8A8F9E;font-size:10.5px;margin-top:2px}
+
+/* ── Controls ── */
+#controls{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.ctrl-pill{background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:999px}
+#search-wrap{display:flex;align-items:center;gap:7px;padding:6px 13px}
+#search-input{background:transparent;border:none;outline:none;color:#EDE7D6;font-family:inherit;font-size:13px;width:148px}
+#search-input::placeholder{color:#5C6173}
+#clear-btn{background:none;border:none;cursor:pointer;color:#8A8F9E;font-size:13px;display:none;padding:0;line-height:1}
+#zoom-wrap{display:flex;align-items:center;overflow:hidden}
+.zbtn{background:none;border:none;cursor:pointer;color:#8A8F9E;padding:7px 10px;display:flex;align-items:center;transition:background .15s}
+.zbtn:hover{background:rgba(255,255,255,.07)}
+#zoom-pct{color:#8A8F9E;font-family:monospace;font-size:11px;min-width:40px;text-align:center;cursor:default}
+.vd{width:1px;height:18px;background:#2A3142}
+#reset-btn,#lang-btn{background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:999px;cursor:pointer;color:#8A8F9E;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:monospace;font-size:11px;letter-spacing:.04em;white-space:nowrap}
+#reset-btn:hover,#lang-btn:hover{background:rgba(255,255,255,.07);color:#EDE7D6}
+#lang-btn{font-weight:bold;color:#4FC3E8;border-color:#2A4A5A}
+
+/* ── Legend ── */
+#legend{position:absolute;bottom:14px;left:14px;background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:12px;padding:11px;max-width:240px}
+#leg-toggle{background:none;border:none;cursor:pointer;color:#EDE7D6;font-family:inherit;font-size:11px;font-weight:bold;display:flex;align-items:center;gap:4px;padding:0}
+#era-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.era-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;font-family:inherit;padding:0;transition:opacity .15s}
+.era-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.era-lbl{color:#C9CCD6;font-size:10.5px}
+#leg-hint{color:#5C6173;font-size:9px;margin-top:8px;line-height:1.65}
+#leg-hint span{color:#3A405A}
+
+/* ── Detail panel ── */
+#detail{position:absolute;top:66px;right:14px;bottom:14px;width:284px;background:rgba(14,17,28,.97);border:1px solid #2A3142;border-radius:12px;padding:15px;overflow-y:auto;display:none}
+#detail.open{display:block}
+#d-close{float:right;background:none;border:none;cursor:pointer;color:#8A8F9E;font-size:16px;line-height:1;padding:0}
+#d-era{font-size:10px;letter-spacing:.05em;margin-top:4px;clear:right}
+#d-name{color:#EDE7D6;font-size:19px;font-weight:bold;margin-top:3px}
+#d-meta{color:#8A8F9E;font-size:11px;margin-bottom:3px}
+#d-summary{color:#C9CCD6;font-size:12px;line-height:1.75;margin-top:7px}
+#d-rel-title{color:#8A8F9E;font-size:10px;margin-top:13px;margin-bottom:5px}
+#d-rels{display:flex;flex-direction:column;gap:5px}
+.rel-row{background:rgba(255,255,255,.03);border:1px solid #232838;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;width:100%}
+.rel-row:hover{background:rgba(255,255,255,.07)}
+.rel-name{color:#EDE7D6;font-size:12px}
+.rel-type{font-size:9.5px}
+.node-label{paint-order:stroke;stroke:#0A0D14;stroke-width:3px;fill:#EDE7D6;font-size:11px;pointer-events:none;font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  #title h1{font-size:14px}
+  #title p{font-size:9.5px}
+  #controls{top:10px;right:10px;gap:5px}
+  #search-input{width:110px}
+  #detail{
+    position:fixed;top:auto;right:0;left:0;bottom:0;width:100%;
+    max-height:58vh;border-radius:12px 12px 0 0;border-bottom:none
+  }
+  #legend{max-width:200px;padding:9px;bottom:10px;left:10px}
+  .era-lbl{font-size:9.5px}
+}
+@media(max-width:400px){
+  #search-wrap{padding:5px 10px}
+  #search-input{width:90px;font-size:12px}
+  #zoom-pct{min-width:34px;font-size:10px}
+  .zbtn{padding:6px 8px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<svg id="graph"></svg>
+
+<div id="title">
+  <h1 id="t-title">哲学者カオスマップ</h1>
+  <p id="t-stats"></p>
+</div>
+
+<div id="controls">
+  <div class="ctrl-pill" id="search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="search-input" autocomplete="off"/>
+    <button id="clear-btn">✕</button>
+  </div>
+  <div class="ctrl-pill" id="zoom-wrap">
+    <button class="zbtn" id="btn-zo" title="-">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </button>
+    <div class="vd"></div>
+    <span id="zoom-pct">100%</span>
+    <div class="vd"></div>
+    <button class="zbtn" id="btn-zi" title="+">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </button>
+  </div>
+  <button id="reset-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    <span id="t-reset">リセット</span>
+  </button>
+  <button id="lang-btn">EN</button>
+</div>
+
+<div id="legend">
+  <button id="leg-toggle">ℹ <span id="t-leg-title">時代区分</span></button>
+  <div id="era-list"></div>
+  <div id="leg-hint"><span id="t-leg-hint"></span></div>
+</div>
+
+<div id="detail">
+  <button id="d-close">✕</button>
+  <div id="d-era"></div>
+  <div id="d-name"></div>
+  <div id="d-meta"></div>
+  <p id="d-summary"></p>
+  <div id="d-rel-title"></div>
+  <div id="d-rels"></div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  UI STRINGS
+// ═══════════════════════════════════════════════════════════
+const S = {
+  ja:{
+    title:'哲学者カオスマップ',
+    stats:(n,e)=>n+'名 / '+e+'本の関係線',
+    searchPh:'哲学者を検索…',
+    legTitle:'時代区分（クリックで絞り込み）',
+    hint:'実線=師弟　点線=影響　破線（赤）=批判的対決\n円の大きさ＝関係の多さ\nズーム：ホイール/＋－キー/ボタン　0でリセット',
+    reset:'リセット',
+    relTitle:n=>'関係（'+n+'）',
+    rt:{teacher_out:'師',teacher_in:'弟子',critique:'批判的対決',inf_out:'→影響',inf_in:'影響←'}
+  },
+  en:{
+    title:'Philosopher Network Map',
+    stats:(n,e)=>n+' philosophers / '+e+' connections',
+    searchPh:'Search philosophers…',
+    legTitle:'Era Filter (click to toggle)',
+    hint:'Solid=Teacher/Student  Dotted=Influence  Dashed Red=Critical Engagement\nNode size = number of connections\nZoom: Scroll / ± keys / Buttons   Reset: 0',
+    reset:'Reset',
+    relTitle:n=>'Relations ('+n+')',
+    rt:{teacher_out:'Teacher',teacher_in:'Student',critique:'Critical Engagement',inf_out:'→Influenced',inf_in:'Influenced by'}
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════
+const ERAS=[
+  {id:'ancient',           ja:'古代ギリシア',              en:'Ancient Greece',                        color:'#C9A227'},
+  {id:'medieval',          ja:'中世',                    en:'Medieval',                               color:'#C97B3D'},
+  {id:'rationalism_empiricism',ja:'近世 合理論・経験論',  en:'Early Modern: Rationalism & Empiricism',color:'#4FB3A6'},
+  {id:'idealism',          ja:'ドイツ観念論',              en:'German Idealism',                        color:'#6E7FF3'},
+  {id:'19c_rebels',        ja:'19世紀の反逆者たち',        en:'19th-Century Rebels',                   color:'#E0594A'},
+  {id:'psychoanalysis',    ja:'精神分析',                 en:'Psychoanalysis',                        color:'#B98552'},
+  {id:'pragmatism',        ja:'プラグマティズム',           en:'Pragmatism',                            color:'#A7AC4E'},
+  {id:'phenomenology',     ja:'現象学・実存主義',           en:'Phenomenology & Existentialism',        color:'#A78BE0'},
+  {id:'frankfurt',         ja:'フランクフルト学派・解釈学', en:'Frankfurt School & Hermeneutics',       color:'#7FB28E'},
+  {id:'poststructuralism', ja:'構造主義・ポスト構造主義',   en:'Structuralism & Post-structuralism',   color:'#E08FB0'},
+  {id:'analytic',          ja:'分析哲学・政治哲学',         en:'Analytic & Political Philosophy',       color:'#82A6C9'},
+  {id:'cognitive_science', ja:'認知科学・システム理論',     en:'Cognitive Science & Systems Theory',   color:'#4FC3E8'},
+];
+
+const NODES=[
+  // 古代
+  {id:'thales',      name:'タレス',          en:'Thales',           life:'前624–前546頃',era:'ancient',
+   ja:'万物の根源（アルケー）は水であるとした、西洋最初の哲学者。',
+   summary_en:'Regarded as the first Western philosopher; proposed water as the fundamental substance (arche) of all things.'},
+  {id:'heraclitus',  name:'ヘラクレイトス',   en:'Heraclitus',       life:'前535–前475頃',era:'ancient',
+   ja:'「万物は流転する」。対立と変化の中にロゴスを見た。',
+   summary_en:'Famous for "everything flows." Saw logos—reason and order—in the constant interplay of opposites and change.'},
+  {id:'parmenides',  name:'パルメニデス',      en:'Parmenides',       life:'前515–前450頃',era:'ancient',
+   ja:'「有るものは有り、有らぬものは有らぬ」。変化を否定する存在一元論。',
+   summary_en:'"What is, is; what is not, is not." Denied change and plurality; argued that Being is one, eternal, and unchanging.'},
+  {id:'socrates',    name:'ソクラテス',        en:'Socrates',         life:'前470–前399',  era:'ancient',
+   ja:'問答法（産婆術）により「無知の知」を説いた哲学の父。著作は残さず。',
+   summary_en:'Father of Western philosophy. Practiced dialectical questioning (maieutics) to expose ignorance and seek truth. Left no writings.'},
+  {id:'plato',       name:'プラトン',          en:'Plato',            life:'前427–前347',  era:'ancient',
+   ja:'イデア論。アカデメイア創設。西洋哲学はプラトンへの注釈に過ぎないとも言われる。',
+   summary_en:'Theory of Forms (Ideas). Founded the Academy. Much of Western philosophy has been described as footnotes to Plato.'},
+  {id:'aristotle',   name:'アリストテレス',    en:'Aristotle',        life:'前384–前322',  era:'ancient',
+   ja:'実体論・論理学・倫理学を体系化。リュケイオン創設。中世神学の土台。',
+   summary_en:'Systematized logic, ethics, and metaphysics. Founded the Lyceum. His thought became the foundation of medieval theology.'},
+  {id:'epicurus',    name:'エピクロス',        en:'Epicurus',         life:'前341–前270',  era:'ancient',
+   ja:'快楽主義（アタラクシア＝心の平静）を説いた。原子論的唯物論。',
+   summary_en:'Advocated ataraxia (tranquility) as the highest good. Developed atomic materialism. Influenced later hedonism and materialism.'},
+  {id:'zeno_stoic',  name:'ゼノン（ストア派）',en:'Zeno of Citium',  life:'前334–前262頃',era:'ancient',
+   ja:'ストア派の創始者。理性に従う禁欲的な生を説いた。',
+   summary_en:'Founder of Stoicism. Taught that living according to reason and virtue brings happiness regardless of circumstance.'},
+  {id:'plotinus',    name:'プロティノス',       en:'Plotinus',         life:'204–270',      era:'ancient',
+   ja:'新プラトン主義の祖。「一者」からの流出論。キリスト教神学に多大な影響。',
+   summary_en:'Founder of Neoplatonism. His theory of emanation from "the One" profoundly influenced Christian theology and mysticism.'},
+  // 中世
+  {id:'augustine',   name:'アウグスティヌス',  en:'Augustine',        life:'354–430',      era:'medieval',
+   ja:'プラトン主義とキリスト教を統合。『告白』『神の国』。恩寵論。',
+   summary_en:'Synthesized Neoplatonism with Christianity. Author of Confessions and City of God. His theology of grace shaped Western Christianity.'},
+  {id:'boethius',    name:'ボエティウス',       en:'Boethius',         life:'480–524頃',    era:'medieval',
+   ja:'獄中で『哲学の慰め』を著す。古代哲学を中世へ橋渡しした翻訳者。',
+   summary_en:'Wrote The Consolation of Philosophy in prison. Transmitted Aristotle and Neoplatonism to the medieval Latin West.'},
+  {id:'anselm',      name:'アンセルムス',       en:'Anselm',           life:'1033–1109',    era:'medieval',
+   ja:'神の存在論的証明（最大の存在者は実在せねばならない）を提示。',
+   summary_en:'Proposed the ontological argument for God: the greatest conceivable being must exist in reality, not only in thought.'},
+  {id:'avicenna',    name:'イブン・スィーナー', en:'Avicenna',         life:'980–1037',     era:'medieval',
+   ja:'アリストテレスを継承したイスラーム哲学最大の体系家。医学者でもある。',
+   summary_en:'Greatest systematizer of Islamic Aristotelian philosophy. Also a renowned physician whose Canon of Medicine was used for centuries.'},
+  {id:'averroes',    name:'イブン・ルシュド',   en:'Averroes',         life:'1126–1198',    era:'medieval',
+   ja:'「注釈者」と呼ばれるアリストテレス注釈の権威。ラテン・アヴェロエス主義を生む。',
+   summary_en:'Known as "The Commentator" on Aristotle. His translations sparked Latin Averroism and debate in medieval European universities.'},
+  {id:'aquinas',     name:'トマス・アクィナス', en:'Thomas Aquinas',   life:'1225–1274',    era:'medieval',
+   ja:'アリストテレス哲学とキリスト教神学を統合。スコラ哲学の頂点『神学大全』。',
+   summary_en:'Synthesized Aristotle with Christian theology in the Summa Theologica. The culmination of Scholastic philosophy.'},
+  {id:'scotus',      name:'ドゥンス・スコトゥス',en:'Duns Scotus',    life:'1266–1308',    era:'medieval',
+   ja:'トマス主義を批判し「このもの性（haecceitas）」など精緻な実在論を展開。',
+   summary_en:'Critiqued Thomism and introduced haecceity (thisness) as an individuating principle. Developed a subtle, refined realist metaphysics.'},
+  {id:'ockham',      name:'オッカムのウィリアム',en:'William of Ockham',life:'1287–1347',  era:'medieval',
+   ja:'唯名論者。「オッカムの剃刀」で不要な実体を切り捨てる思考を徹底。',
+   summary_en:'Nominalist thinker. "Ockham\'s Razor" urges eliminating unnecessary entities. Radically separated faith from reason.'},
+  // 近世
+  {id:'descartes',   name:'デカルト',          en:'Descartes',        life:'1596–1650',    era:'rationalism_empiricism',
+   ja:'方法的懐疑の果てに「我思う、ゆえに我あり」。心身二元論。近代哲学の父。',
+   summary_en:'"I think, therefore I am." Founded modern philosophy through methodological doubt; established mind-body dualism.'},
+  {id:'pascal',      name:'パスカル',           en:'Pascal',           life:'1623–1662',    era:'rationalism_empiricism',
+   ja:'「人間は考える葦である」。幾何学の精神と繊細の精神の対比。',
+   summary_en:'"Man is a thinking reed." Contrasted the mathematical spirit with the intuitive spirit. A forerunner of existential thinking.'},
+  {id:'hobbes',      name:'ホッブズ',           en:'Hobbes',           life:'1588–1679',    era:'rationalism_empiricism',
+   ja:'『リヴァイアサン』。万人の万人に対する闘争を避けるための社会契約。',
+   summary_en:'Leviathan argues that social contract is needed to escape the "war of all against all" in the brutish state of nature.'},
+  {id:'spinoza',     name:'スピノザ',           en:'Spinoza',          life:'1632–1677',    era:'rationalism_empiricism',
+   ja:'神即自然（汎神論）の一元論。幾何学的秩序で倫理を論証。',
+   summary_en:'God = Nature (pantheistic monism). Demonstrated ethics through geometric method. Influenced German Idealism profoundly.'},
+  {id:'leibniz',     name:'ライプニッツ',        en:'Leibniz',          life:'1646–1716',    era:'rationalism_empiricism',
+   ja:'モナド論。可能世界の中で「最善世界」が現実化したとする予定調和説。',
+   summary_en:'Monadology. Argued we live in "the best of all possible worlds" through God\'s pre-established harmony. Co-inventor of calculus.'},
+  {id:'locke',       name:'ロック',             en:'Locke',            life:'1632–1704',    era:'rationalism_empiricism',
+   ja:'心は白紙（タブラ・ラサ）。経験論と自由主義の祖。所有権論。',
+   summary_en:'Mind as a blank slate (tabula rasa). Father of empiricism and liberalism; his property rights theory influenced constitutionalism.'},
+  {id:'berkeley',    name:'バークリー',          en:'Berkeley',         life:'1685–1753',    era:'rationalism_empiricism',
+   ja:'「存在するとは知覚されることである」。主観的観念論。',
+   summary_en:'"To be is to be perceived." Denied the existence of matter; only minds and their ideas exist—subjective idealism.'},
+  {id:'hume',        name:'ヒューム',            en:'Hume',             life:'1711–1776',    era:'rationalism_empiricism',
+   ja:'因果律は習慣に過ぎないという徹底した懐疑論。カントを独断のまどろみから覚ます。',
+   summary_en:'Radical skeptic who argued causation is mere habit. His challenge to rationalism woke Kant from his "dogmatic slumber."'},
+  {id:'rousseau',    name:'ルソー',             en:'Rousseau',         life:'1712–1778',    era:'rationalism_empiricism',
+   ja:'一般意志と人民主権論。「自然に帰れ」。フランス革命に思想的影響。',
+   summary_en:'General will and popular sovereignty. "Back to nature." His ideas became a major intellectual force behind the French Revolution.'},
+  // 観念論
+  {id:'kant',        name:'カント',             en:'Kant',             life:'1724–1804',    era:'idealism',
+   ja:'理性そのものを批判する「コペルニクス的転回」。三批判書。近代哲学の分水嶺。',
+   summary_en:'"Copernican Revolution" in philosophy: the mind actively shapes experience. Author of the three Critiques. The great turning point of modern philosophy.'},
+  {id:'fichte',      name:'フィヒテ',            en:'Fichte',           life:'1762–1814',    era:'idealism',
+   ja:'カントの実践哲学を徹底化し「自我」が世界を定立するとする主観的観念論。',
+   summary_en:'Radicalized Kant\'s practical philosophy: the self (Ich) posits both itself and the world. Developed subjective idealism.'},
+  {id:'schelling',   name:'シェリング',          en:'Schelling',        life:'1775–1854',    era:'idealism',
+   ja:'自然哲学・同一哲学。ヘーゲルとは盟友から論敵に。後期は実存哲学へ接近。',
+   summary_en:'Nature philosophy and identity philosophy. Hegel\'s collaborator turned rival. His later work foreshadowed existential concerns.'},
+  {id:'hegel',       name:'ヘーゲル',            en:'Hegel',            life:'1770–1831',    era:'idealism',
+   ja:'弁証法（正反合）で歴史と精神の発展を体系化。「絶対精神」。19世紀思想の巨大な分岐点。',
+   summary_en:'Dialectic (thesis-antithesis-synthesis) as the self-unfolding of Absolute Spirit through history. The great 19th-century pivot around which rebels defined themselves.'},
+  // 19世紀
+  {id:'schopenhauer',name:'ショーペンハウアー',   en:'Schopenhauer',     life:'1788–1860',    era:'19c_rebels',
+   ja:'世界は盲目的な「意志」の表象。ヘーゲルを蛇蝎の如く嫌った厭世哲学者。仏教にも接近。',
+   summary_en:'The world as blind Will and Representation. Pessimist who despised Hegel. Drew on Buddhism and influenced Nietzsche profoundly.'},
+  {id:'kierkegaard', name:'キルケゴール',         en:'Kierkegaard',      life:'1813–1855',    era:'19c_rebels',
+   ja:'ヘーゲルの体系を批判し「単独者」の実存（美的・倫理的・宗教的の三段階）を説く。実存主義の祖。',
+   summary_en:'Against Hegel\'s system: the individual moves through aesthetic, ethical, and religious stages. Father of existentialism.'},
+  {id:'marx',        name:'マルクス',             en:'Marx',             life:'1818–1883',    era:'19c_rebels',
+   ja:'ヘーゲル弁証法を唯物論的に転倒。唯物史観・疎外論・階級闘争。',
+   summary_en:'Inverted Hegel\'s dialectic into historical materialism. Theories of alienation, class struggle, and ideology shaped modern political thought.'},
+  {id:'nietzsche',   name:'ニーチェ',             en:'Nietzsche',        life:'1844–1900',    era:'19c_rebels',
+   ja:'「神は死んだ」。価値の系譜学、力への意志、超人、永劫回帰。20世紀思想の起爆剤。',
+   summary_en:'"God is dead." Genealogy of morals, will to power, Übermensch, eternal recurrence. Catalyst for 20th-century thought across continents.'},
+  {id:'mill',        name:'J.S.ミル',            en:'John Stuart Mill', life:'1806–1873',    era:'19c_rebels',
+   ja:'功利主義を質的に洗練。『自由論』で個人の自由と他者危害原則を論じる。',
+   summary_en:'Refined utilitarianism qualitatively. On Liberty defended individual freedom limited only by the harm principle.'},
+  {id:'comte',       name:'コント',              en:'Comte',            life:'1798–1857',    era:'19c_rebels',
+   ja:'実証主義の創始者。社会学の父。神学的→形而上学的→実証的の三段階法則。',
+   summary_en:'Founder of positivism and sociology. Three stages of knowledge: theological → metaphysical → positive (scientific).'},
+  // 精神分析
+  {id:'freud',       name:'フロイト',             en:'Freud',            life:'1856–1939',    era:'psychoanalysis',
+   ja:'無意識・エス＝自我＝超自我。精神分析を創始し、20世紀の人間観を一変させた。',
+   summary_en:'Founded psychoanalysis. The unconscious, id/ego/superego. Transformed 20th-century understanding of mind, culture, and human nature.'},
+  // プラグマティズム
+  {id:'peirce',      name:'パース',              en:'Peirce',           life:'1839–1914',    era:'pragmatism',
+   ja:'プラグマティズムの創始者。記号論・アブダクション（仮説形成）の理論家。',
+   summary_en:'Founder of pragmatism. Developed semiotics and the theory of abductive inference (hypothesis formation).'},
+  {id:'james',       name:'ジェイムズ',           en:'William James',    life:'1842–1910',    era:'pragmatism',
+   ja:'「根本的経験論」。真理を実用的な働きとして捉えるプラグマティズムを大成。',
+   summary_en:'"Radical empiricism." Defined truth by its practical consequences; made pragmatism a dominant movement in American philosophy.'},
+  {id:'dewey',       name:'デューイ',             en:'Dewey',            life:'1859–1952',    era:'pragmatism',
+   ja:'道具主義。教育哲学と民主主義論で米国思想に絶大な影響。',
+   summary_en:'Instrumentalism. His educational philosophy (learning by doing) and democratic theory shaped American intellectual and civic life.'},
+  // 現象学
+  {id:'husserl',     name:'フッサール',           en:'Husserl',          life:'1859–1938',    era:'phenomenology',
+   ja:'「事象そのものへ」。現象学的還元により意識の志向性を厳密に記述する方法を確立。',
+   summary_en:'"Back to the things themselves." Established phenomenological reduction to rigorously describe intentional consciousness.'},
+  {id:'heidegger',   name:'ハイデガー',           en:'Heidegger',        life:'1889–1976',    era:'phenomenology',
+   ja:'『存在と時間』。現存在の実存論的分析から存在一般の意味を問う。20世紀思想の最大のハブ。',
+   summary_en:'Being and Time. Existential analysis of Dasein in pursuit of the meaning of Being itself. The central hub of 20th-century thought.'},
+  {id:'jaspers',     name:'ヤスパース',           en:'Jaspers',          life:'1883–1969',    era:'phenomenology',
+   ja:'限界状況（死・苦・争い・罪）における実存の超越論的把握。精神科医でもあった。',
+   summary_en:'Existential philosophy of "limit situations" (death, struggle, guilt). A practicing psychiatrist who explored transcendence.'},
+  {id:'sartre',      name:'サルトル',             en:'Sartre',           life:'1905–1980',    era:'phenomenology',
+   ja:'「実存は本質に先立つ」。即自・対自存在論とアンガジュマン（社会参加）の思想。',
+   summary_en:'"Existence precedes essence." Being-for-itself vs. in-itself. Advocated political engagement (engagement) as existentialist responsibility.'},
+  {id:'beauvoir',    name:'ボーヴォワール',        en:'Beauvoir',         life:'1908–1986',    era:'phenomenology',
+   ja:'「人は女に生まれるのではない、女になるのだ」。『第二の性』はフェミニズム理論の源流。',
+   summary_en:'"One is not born, but rather becomes, a woman." The Second Sex is the founding text of feminist philosophy.'},
+  {id:'merleau_ponty',name:'メルロ＝ポンティ',   en:'Merleau-Ponty',    life:'1908–1961',    era:'phenomenology',
+   ja:'身体を主体と客体の絶対的な分離以前のものとして捉える身体の現象学。',
+   summary_en:'Phenomenology of the body: the body is the primordial site of experience, prior to the subject/object split. Key influence on enactivism.'},
+  {id:'camus',       name:'カミュ',              en:'Camus',            life:'1913–1960',    era:'phenomenology',
+   ja:'不条理の哲学。『シーシュポスの神話』『反抗的人間』。サルトルと思想的に決裂。',
+   summary_en:'Philosophy of the absurd. The Myth of Sisyphus. The Rebel. Broke with Sartre over the ethics of revolt and political violence.'},
+  {id:'levinas',     name:'レヴィナス',           en:'Levinas',          life:'1906–1995',    era:'phenomenology',
+   ja:'「他者の顔」が無限の倫理的責任を呼びかける。存在論を超えた倫理を哲学第一に据える。',
+   summary_en:'"The face of the Other" summons infinite ethical responsibility. Placed ethics—not ontology—as first philosophy.'},
+  {id:'arendt',      name:'アーレント',           en:'Arendt',           life:'1906–1975',    era:'phenomenology',
+   ja:'全体主義批判、活動的生（労働・仕事・活動）の区別。公共性の政治哲学。',
+   summary_en:'Critique of totalitarianism. Distinctions among labor, work, and action. Developed a political philosophy of the public sphere.'},
+  // フランクフルト
+  {id:'dilthey',     name:'ディルタイ',           en:'Dilthey',          life:'1833–1911',    era:'frankfurt',
+   ja:'「生の哲学」。自然科学と精神科学（人文学）を方法的に区別し解釈学を準備。',
+   summary_en:'"Philosophy of life." Distinguished natural sciences from human sciences (Geisteswissenschaften); prepared the ground for hermeneutics.'},
+  {id:'benjamin',    name:'ベンヤミン',           en:'Benjamin',         life:'1892–1940',    era:'frankfurt',
+   ja:'『複製技術時代の芸術作品』。アウラの消滅、歴史の天使。フランクフルト学派の周縁の天才。',
+   summary_en:'The "aura" and its loss in the age of mechanical reproduction. Allegory and the Angel of History. A tragic genius on the margins of the Frankfurt School.'},
+  {id:'horkheimer',  name:'ホルクハイマー',        en:'Horkheimer',       life:'1895–1973',    era:'frankfurt',
+   ja:'フランクフルト社会研究所所長。批判理論の確立者。アドルノと『啓蒙の弁証法』。',
+   summary_en:'Director of the Frankfurt Institute. Established Critical Theory. Co-authored Dialectic of Enlightenment with Adorno.'},
+  {id:'adorno',      name:'アドルノ',             en:'Adorno',           life:'1903–1969',    era:'frankfurt',
+   ja:'否定弁証法。文化産業批判、アウシュヴィッツ以後の詩・哲学を問う。',
+   summary_en:'Negative dialectics. Critique of the culture industry. Interrogated what poetry and philosophy could mean after Auschwitz.'},
+  {id:'marcuse',     name:'マルクーゼ',           en:'Marcuse',          life:'1898–1979',    era:'frankfurt',
+   ja:'『一次元的人間』。マルクスとフロイトを統合し管理社会を批判。新左翼の理論的支柱。',
+   summary_en:'One-Dimensional Man. Synthesized Marx and Freud to critique managed society. Theoretical pillar of the New Left.'},
+  {id:'gadamer',     name:'ガダマー',             en:'Gadamer',          life:'1900–2002',    era:'frankfurt',
+   ja:'『真理と方法』。解釈学的循環、地平の融合という理解の存在論を展開。',
+   summary_en:'Truth and Method. The hermeneutical circle and "fusion of horizons" as an ontology of understanding.'},
+  {id:'ricoeur',     name:'リクール',             en:'Ricoeur',          life:'1913–2005',    era:'frankfurt',
+   ja:'物語的アイデンティティ論。解釈学と現象学を架橋し、テクスト論にも接続。',
+   summary_en:'Narrative identity theory. Bridged hermeneutics and phenomenology; extended both into text theory and selfhood.'},
+  {id:'habermas',    name:'ハーバーマス',          en:'Habermas',         life:'1929–',        era:'frankfurt',
+   ja:'コミュニケーション的行為の理論。フランクフルト学派第二世代、公共圏論。',
+   summary_en:'Theory of communicative action. Second-generation Frankfurt School. Theorist of the public sphere and deliberative democracy.'},
+  // 構造主義
+  {id:'saussure',    name:'ソシュール',           en:'Saussure',         life:'1857–1913',    era:'poststructuralism',
+   ja:'『一般言語学講義』。言語をシニフィアン／シニフィエの差異の体系として捉える構造主義言語学の祖。',
+   summary_en:'Course in General Linguistics. Language as a system of differences between signifier and signified. Father of structuralism.'},
+  {id:'levi_strauss',name:'レヴィ＝ストロース',    en:'Lévi-Strauss',     life:'1908–2009',    era:'poststructuralism',
+   ja:'『野生の思考』。神話・親族構造を分析し構造主義人類学を確立。サルトルの主体哲学を批判。',
+   summary_en:'The Savage Mind. Established structural anthropology by analyzing myth and kinship. Critiqued Sartrean subjectivism.'},
+  {id:'lacan',       name:'ラカン',              en:'Lacan',            life:'1901–1981',     era:'poststructuralism',
+   ja:'「無意識は言語のように構造化されている」。鏡像段階論。フロイトの構造主義的再読。',
+   summary_en:'"The unconscious is structured like a language." Mirror stage theory. A structural re-reading of Freud.'},
+  {id:'barthes',     name:'バルト',              en:'Barthes',          life:'1915–1980',    era:'poststructuralism',
+   ja:'「作者の死」。記号論を文化・神話・テクスト読解に応用、テクストの快楽を論じる。',
+   summary_en:'"The Death of the Author." Applied semiotics to culture, myth, and texts. Theorized the pleasure of the text.'},
+  {id:'foucault',    name:'フーコー',             en:'Foucault',         life:'1926–1984',    era:'poststructuralism',
+   ja:'知と権力、生政治、規律訓練。狂気・監獄・性の歴史を通じ近代的主体の系譜学を描く。',
+   summary_en:'Power/knowledge, biopower, disciplinary society. Genealogies of madness, the prison, and sexuality reveal how the modern subject is constructed.'},
+  {id:'deleuze',     name:'ドゥルーズ',           en:'Deleuze',          life:'1925–1995',    era:'poststructuralism',
+   ja:'差異と反復、リゾーム、器官なき身体。ガタリと『アンチ・オイディプス』。',
+   summary_en:'Difference and Repetition. Rhizome, Body without Organs. Anti-Oedipus (with Guattari). Philosophy as creation of concepts.'},
+  {id:'derrida',     name:'デリダ',              en:'Derrida',          life:'1930–2004',    era:'poststructuralism',
+   ja:'脱構築。西洋形而上学の音声中心主義・現前の特権を問い直す。',
+   summary_en:'Deconstruction. Challenged the phonocentrism and metaphysics of presence underlying all of Western philosophy.'},
+  {id:'kristeva',    name:'クリステヴァ',          en:'Kristeva',         life:'1941–',        era:'poststructuralism',
+   ja:'アブジェクション論、間テクスト性。精神分析・記号論・フェミニズムを横断。',
+   summary_en:'Abjection theory, intertextuality. Traversed psychoanalysis, semiotics, and feminism in an original theoretical synthesis.'},
+  // 分析哲学
+  {id:'frege',       name:'フレーゲ',             en:'Frege',            life:'1848–1925',    era:'analytic',
+   ja:'近代論理学の創始者。「意味と意義」の区別。分析哲学の源流。',
+   summary_en:'Founder of modern logic. Sense/reference distinction. The deep source of the entire analytic philosophy tradition.'},
+  {id:'russell',     name:'ラッセル',             en:'Russell',          life:'1872–1970',    era:'analytic',
+   ja:'論理的原子論。『プリンキピア・マテマティカ』。ウィトゲンシュタインの師。',
+   summary_en:'Logical atomism. Co-authored Principia Mathematica. Mentor to Wittgenstein and co-founder of analytic philosophy.'},
+  {id:'moore',       name:'ムーア',              en:'G.E. Moore',       life:'1873–1958',    era:'analytic',
+   ja:'常識哲学、自然主義的誤謬の指摘。ケンブリッジの分析哲学黎明期を主導。',
+   summary_en:'Common-sense philosophy; identified the naturalistic fallacy in ethics. Co-led the analytic revolution at Cambridge.'},
+  {id:'wittgenstein',name:'ウィトゲンシュタイン',  en:'Wittgenstein',     life:'1889–1951',    era:'analytic',
+   ja:'『論理哲学論考』から『哲学探究』へ。言語ゲーム論。分析哲学を二度方向づけた異才。',
+   summary_en:'From the Tractatus to the Philosophical Investigations. Language-game theory. Redirected analytic philosophy twice.'},
+  {id:'carnap',      name:'カルナップ',           en:'Carnap',           life:'1891–1970',    era:'analytic',
+   ja:'論理実証主義（ウィーン学団）の中心人物。検証可能性原理で形而上学を退ける。',
+   summary_en:'Central figure of logical positivism (Vienna Circle). The verifiability principle dismissed metaphysical claims as meaningless.'},
+  {id:'popper',      name:'ポパー',              en:'Popper',           life:'1902–1994',    era:'analytic',
+   ja:'反証可能性を科学の基準とする。『開かれた社会とその敵』で全体主義を批判。',
+   summary_en:'Falsifiability as the criterion of science. The Open Society and Its Enemies critiqued totalitarianism and historicism.'},
+  {id:'quine',       name:'クワイン',             en:'Quine',            life:'1908–2000',    era:'analytic',
+   ja:'「経験主義の二つのドグマ」で論理実証主義の分析/総合の区別を批判。存在論的相対性。',
+   summary_en:'"Two Dogmas of Empiricism" dismantled the analytic/synthetic distinction. Developed ontological relativity.'},
+  {id:'rawls',       name:'ロールズ',             en:'Rawls',            life:'1921–2002',    era:'analytic',
+   ja:'『正義論』。無知のヴェールという思考実験で公正としての正義を導く。20世紀政治哲学の中心。',
+   summary_en:'A Theory of Justice. The "veil of ignorance" thought experiment grounds justice as fairness. Dominant 20th-century political philosophy.'},
+  {id:'nozick',      name:'ノージック',           en:'Nozick',           life:'1938–2002',    era:'analytic',
+   ja:'『アナーキー・国家・ユートピア』でロールズに反論し最小国家論を擁護。リバタリアニズムの理論的支柱。',
+   summary_en:'Anarchy, State, and Utopia challenged Rawls to defend the minimal state. Theoretical anchor of libertarianism.'},
+  // 認知科学
+  {id:'uexkull',     name:'ユクスキュル',          en:'von Uexküll',     life:'1864–1944',    era:'cognitive_science',
+   ja:'環世界（Umwelt）論。動物はそれぞれ固有の知覚・行動世界に生きるとした生物学者。ハイデガーの動物論に影響。',
+   summary_en:'Developed Umwelt theory: each animal inhabits a species-specific perceptual world. Influenced Heidegger\'s analysis of animal life.'},
+  {id:'jonas',       name:'ハンス・ヨーナス',     en:'Hans Jonas',       life:'1903–1993',    era:'cognitive_science',
+   ja:'ハイデガー門下、アーレントの盟友。生命を自己維持する代謝過程として捉える生命の哲学を展開し、オートポイエーシス論に影響。',
+   summary_en:'Heidegger\'s student and Arendt\'s friend. Philosophy of life treated organisms as self-sustaining metabolic processes; directly influenced autopoiesis theory.'},
+  {id:'maturana',    name:'マトゥラーナ',          en:'Maturana',         life:'1928–2021',    era:'cognitive_science',
+   ja:'チリの生物学者。ヴァレラと共にオートポイエーシス（自己産出系）概念を提唱。',
+   summary_en:'Chilean biologist. Co-developed autopoiesis (self-organizing, self-producing living systems) with Varela as a theory of life.'},
+  {id:'varela',      name:'ヴァレラ',             en:'Varela',           life:'1946–2001',    era:'cognitive_science',
+   ja:'オートポイエーシスを基盤にエナクティビズム（身体化された心）と神経現象学を提唱。フッサール・メルロ＝ポンティを認知科学に接続。',
+   summary_en:'Built on autopoiesis to develop enactivism (embodied mind) and neurophenomenology, linking Husserl and Merleau-Ponty to cognitive science.'},
+  {id:'luhmann',     name:'ルーマン',             en:'Luhmann',          life:'1927–1998',    era:'cognitive_science',
+   ja:'オートポイエーシス概念を社会システム理論に応用。ハーバーマスとの論争で知られる。',
+   summary_en:'Applied autopoiesis to social systems: society self-produces through communication, not individuals. Debated Habermas on rationality.'},
+];
+
+const EDGES=[
+  ['socrates','plato','teacher'],['plato','aristotle','teacher'],
+  ['heraclitus','plato','influence'],['parmenides','plato','influence'],
+  ['plato','plotinus','influence'],['aristotle','avicenna','influence'],
+  ['aristotle','averroes','influence'],['aristotle','aquinas','influence'],
+  ['epicurus','marx','influence'],['socrates','zeno_stoic','influence'],
+  ['plotinus','augustine','influence'],['augustine','anselm','influence'],
+  ['anselm','aquinas','influence'],['avicenna','aquinas','influence'],
+  ['averroes','aquinas','critique'],['aquinas','scotus','critique'],
+  ['scotus','ockham','critique'],['augustine','descartes','influence'],
+  ['augustine','kierkegaard','influence'],['boethius','aquinas','influence'],
+  ['descartes','spinoza','influence'],['descartes','leibniz','influence'],
+  ['descartes','locke','critique'],['hobbes','locke','influence'],
+  ['hobbes','rousseau','critique'],['locke','berkeley','influence'],
+  ['berkeley','hume','influence'],['hume','kant','influence'],
+  ['locke','rousseau','influence'],['rousseau','kant','influence'],
+  ['pascal','kierkegaard','influence'],['spinoza','hegel','influence'],
+  ['leibniz','kant','influence'],['locke','rawls','influence'],
+  ['hobbes','rawls','influence'],['kant','fichte','teacher'],
+  ['fichte','schelling','influence'],['schelling','hegel','influence'],
+  ['kant','hegel','influence'],['hegel','kierkegaard','critique'],
+  ['hegel','marx','critique'],['hegel','schopenhauer','critique'],
+  ['kant','schopenhauer','influence'],['schopenhauer','nietzsche','influence'],
+  ['hegel','nietzsche','critique'],['kierkegaard','heidegger','influence'],
+  ['kierkegaard','sartre','influence'],['marx','horkheimer','influence'],
+  ['marx','benjamin','influence'],['marx','adorno','influence'],
+  ['nietzsche','heidegger','influence'],['nietzsche','foucault','influence'],
+  ['nietzsche','derrida','influence'],['nietzsche','deleuze','influence'],
+  ['nietzsche','freud','influence'],['schopenhauer','freud','influence'],
+  ['mill','rawls','influence'],['peirce','james','influence'],
+  ['james','dewey','influence'],['husserl','heidegger','teacher'],
+  ['heidegger','sartre','influence'],['heidegger','arendt','teacher'],
+  ['jaspers','arendt','teacher'],['heidegger','jaspers','influence'],
+  ['husserl','levinas','teacher'],['heidegger','levinas','critique'],
+  ['sartre','beauvoir','influence'],['beauvoir','sartre','influence'],
+  ['husserl','merleau_ponty','influence'],['heidegger','merleau_ponty','influence'],
+  ['sartre','camus','critique'],['heidegger','gadamer','teacher'],
+  ['heidegger','derrida','influence'],['husserl','derrida','critique'],
+  ['dilthey','heidegger','influence'],['dilthey','gadamer','influence'],
+  ['horkheimer','adorno','influence'],['benjamin','adorno','influence'],
+  ['adorno','habermas','influence'],['adorno','marcuse','influence'],
+  ['freud','marcuse','influence'],['gadamer','ricoeur','influence'],
+  ['heidegger','ricoeur','influence'],['foucault','habermas','critique'],
+  ['saussure','levi_strauss','influence'],['levi_strauss','lacan','influence'],
+  ['levi_strauss','barthes','influence'],['levi_strauss','foucault','influence'],
+  ['saussure','barthes','influence'],['saussure','derrida','critique'],
+  ['heidegger','foucault','influence'],['foucault','deleuze','influence'],
+  ['freud','lacan','influence'],['lacan','kristeva','influence'],
+  ['frege','russell','influence'],['frege','wittgenstein','influence'],
+  ['russell','wittgenstein','teacher'],['russell','moore','influence'],
+  ['moore','wittgenstein','influence'],['wittgenstein','carnap','influence'],
+  ['carnap','quine','critique'],['russell','popper','influence'],
+  ['kant','rawls','influence'],['rawls','nozick','critique'],
+  ['locke','nozick','influence'],['levi_strauss','sartre','critique'],
+  ['uexkull','heidegger','influence'],['heidegger','jonas','teacher'],
+  ['jonas','maturana','influence'],['jonas','varela','influence'],
+  ['husserl','varela','influence'],['merleau_ponty','varela','influence'],
+  ['maturana','varela','teacher'],['maturana','luhmann','influence'],
+  ['habermas','luhmann','critique'],['aristotle','maturana','influence'],
+].map(([s,t,type])=>({source:s,target:t,type}));
+
+// ───────────────────────────────────────────────
+//  DERIVED
+// ───────────────────────────────────────────────
+const eraMap  = Object.fromEntries(ERAS.map(e=>[e.id,e]));
+const nodeMap = Object.fromEntries(NODES.map(n=>[n.id,n]));
+const degree  = {};
+NODES.forEach(n=>degree[n.id]=0);
+EDGES.forEach(e=>{degree[e.source]=(degree[e.source]||0)+1;degree[e.target]=(degree[e.target]||0)+1;});
+const neighborMap={};
+NODES.forEach(n=>neighborMap[n.id]=new Set());
+EDGES.forEach(e=>{neighborMap[e.source].add(e.target);neighborMap[e.target].add(e.source);});
+
+// ───────────────────────────────────────────────
+//  STATE
+// ───────────────────────────────────────────────
+let lang='ja';
+let selectedId=null, hoveredId=null, searchQ='';
+let legendOpen = window.innerWidth>640;
+const enabledEras=new Set(ERAS.map(e=>e.id));
+
+// ───────────────────────────────────────────────
+//  D3
+// ───────────────────────────────────────────────
+const svgEl=document.getElementById('graph');
+const svg=d3.select(svgEl);
+const W=()=>window.innerWidth, H=()=>window.innerHeight;
+
+const defs=svg.append('defs');
+const filt=defs.append('filter').attr('id','glow');
+filt.append('feGaussianBlur').attr('stdDeviation','2.2').attr('result','blur');
+const fm=filt.append('feMerge');
+fm.append('feMergeNode').attr('in','blur');
+fm.append('feMergeNode').attr('in','SourceGraphic');
+
+const g=svg.append('g');
+
+const zoom=d3.zoom().scaleExtent([0.2,4]).on('zoom',ev=>{
+  g.attr('transform',ev.transform);
+  document.getElementById('zoom-pct').textContent=Math.round(ev.transform.k*100)+'%';
+});
+svg.call(zoom).on('click',()=>selectNode(null));
+
+// Mac trackpad + mobile: prevent default to give D3 full control
+svgEl.addEventListener('wheel',     e=>e.preventDefault(),{passive:false});
+svgEl.addEventListener('touchmove', e=>e.preventDefault(),{passive:false});
+
+const nodes=NODES.map(n=>({...n}));
+const links=EDGES.map(e=>({...e}));
+
+const sim=d3.forceSimulation(nodes)
+  .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>d.type==='teacher'?60:95).strength(0.45))
+  .force('charge',d3.forceManyBody().strength(-200))
+  .force('center',d3.forceCenter(W()/2,H()/2))
+  .force('collision',d3.forceCollide().radius(d=>8+(degree[d.id]||0)*1.2+22));
+
+const linkSel=g.append('g').selectAll('line').data(links).join('line')
+  .attr('stroke',d=>d.type==='critique'?'#E0594A':'#E8E2D0')
+  .attr('stroke-width',d=>d.type==='teacher'?1.6:1)
+  .attr('stroke-dasharray',d=>d.type==='influence'?'1,4':d.type==='critique'?'4,3':null)
+  .attr('opacity',0.22);
+
+const nodeSel=g.append('g').selectAll('g').data(nodes).join('g')
+  .style('cursor','pointer')
+  .call(d3.drag()
+    .on('start',(ev,d)=>{if(!ev.active)sim.alphaTarget(0.25).restart();d.fx=d.x;d.fy=d.y;})
+    .on('drag',(ev,d)=>{d.fx=ev.x;d.fy=ev.y;})
+    .on('end',(ev,d)=>{if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+  .on('click',(ev,d)=>{ev.stopPropagation();selectNode(d.id);})
+  .on('mouseenter',(ev,d)=>{hoveredId=d.id;updateOpacity();})
+  .on('mouseleave',()=>{hoveredId=null;updateOpacity();});
+
+nodeSel.append('circle')
+  .attr('r',d=>5+(degree[d.id]||0)*1.15)
+  .attr('fill',d=>eraMap[d.era]?.color||'#E8E2D0')
+  .attr('stroke','#0A0D14').attr('stroke-width',1.4)
+  .attr('filter','url(#glow)');
+
+const nodeLabelSel=nodeSel.append('text')
+  .attr('x',d=>7+(degree[d.id]||0)*1.15).attr('y',4)
+  .attr('class','node-label')
+  .text(d=>d.name);
+
+sim.on('tick',()=>{
+  linkSel.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+         .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+  nodeSel.attr('transform',d=>'translate('+d.x+','+d.y+')');
+});
+
+// ───────────────────────────────────────────────
+//  FUNCTIONS
+// ───────────────────────────────────────────────
+function selectNode(id){selectedId=id;updateOpacity();updateDetail();}
+
+function updateOpacity(){
+  const fid=selectedId||hoveredId;
+  const nb=fid?neighborMap[fid]:null;
+  const q=searchQ.toLowerCase();
+  nodeSel.style('opacity',d=>{
+    if(!enabledEras.has(d.era))return 0.04;
+    if(q&&!(d.name.toLowerCase().includes(q)||d.en.toLowerCase().includes(q)))return 0.12;
+    if(fid)return d.id===fid||nb?.has(d.id)?1:0.12;
+    return 1;
+  });
+  linkSel.style('opacity',d=>{
+    const s=d.source.id||d.source,t=d.target.id||d.target;
+    if(!enabledEras.has(d.source.era)||!enabledEras.has(d.target.era))return 0.02;
+    if(fid)return s===fid||t===fid?0.9:0.04;
+    return 0.22;
+  });
+}
+
+function updateDetail(){
+  const panel=document.getElementById('detail');
+  if(!selectedId){panel.classList.remove('open');return;}
+  const n=nodeMap[selectedId],era=eraMap[n.era];
+  const s=S[lang];
+  document.getElementById('d-era').textContent=era?era[lang]:'';
+  document.getElementById('d-era').style.color=era?.color||'#EDE7D6';
+  document.getElementById('d-name').textContent=lang==='en'?n.en:n.name;
+  document.getElementById('d-meta').textContent=(lang==='en'?n.en:n.name)+' ('+n.en+') · '+n.life;
+  if(lang==='en')document.getElementById('d-meta').textContent=n.en+' · '+n.life;
+  document.getElementById('d-summary').textContent=lang==='en'?(n.summary_en||n.ja):n.ja;
+  const conns=EDGES.filter(e=>e.source===selectedId||e.target===selectedId);
+  document.getElementById('d-rel-title').textContent=s.relTitle(conns.length);
+  const relsEl=document.getElementById('d-rels');
+  relsEl.innerHTML='';
+  conns.forEach(e=>{
+    const otherId=e.source===selectedId?e.target:e.source;
+    const dir=e.source===selectedId?'out':'in';
+    const other=nodeMap[otherId];if(!other)return;
+    const tc=e.type==='critique'?'#E0594A':e.type==='teacher'?'#A7AC4E':'#82A6C9';
+    let tl;
+    if(e.type==='teacher')tl=dir==='out'?s.rt.teacher_out:s.rt.teacher_in;
+    else if(e.type==='critique')tl=s.rt.critique;
+    else tl=dir==='out'?s.rt.inf_out:s.rt.inf_in;
+    const btn=document.createElement('button');
+    btn.className='rel-row';
+    btn.innerHTML='<span class="rel-name">'+(lang==='en'?other.en:other.name)+'</span><span class="rel-type" style="color:'+tc+'">'+tl+'</span>';
+    btn.addEventListener('click',()=>selectNode(otherId));
+    relsEl.appendChild(btn);
+  });
+  panel.classList.add('open');
+}
+
+function buildLegend(){
+  const list=document.getElementById('era-list');
+  list.innerHTML='';
+  ERAS.forEach(era=>{
+    const btn=document.createElement('button');
+    btn.className='era-btn';
+    btn.style.opacity=enabledEras.has(era.id)?'1':'0.3';
+    btn.innerHTML='<span class="era-dot" style="background:'+era.color+'"></span><span class="era-lbl">'+era[lang]+'</span>';
+    btn.addEventListener('click',()=>{
+      enabledEras.has(era.id)?enabledEras.delete(era.id):enabledEras.add(era.id);
+      btn.style.opacity=enabledEras.has(era.id)?'1':'0.3';
+      updateOpacity();
+    });
+    list.appendChild(btn);
+  });
+  document.getElementById('era-list').style.display=legendOpen?'flex':'none';
+  document.getElementById('leg-hint').style.display=legendOpen?'block':'none';
+}
+
+function applyStrings(){
+  const s=S[lang];
+  document.getElementById('t-title').textContent=s.title;
+  document.getElementById('t-stats').textContent=s.stats(NODES.length,EDGES.length);
+  document.getElementById('search-input').placeholder=s.searchPh;
+  document.getElementById('t-leg-title').textContent=s.legTitle;
+  document.getElementById('t-leg-hint').textContent=s.hint;
+  document.getElementById('t-reset').textContent=s.reset;
+  document.getElementById('lang-btn').textContent=lang==='ja'?'EN':'JP';
+  nodeLabelSel.text(d=>lang==='en'?d.en:d.name);
+  buildLegend();
+  if(selectedId)updateDetail();
+}
+
+function doReset(){
+  svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity);
+  selectNode(null);
+  searchQ='';
+  document.getElementById('search-input').value='';
+  document.getElementById('clear-btn').style.display='none';
+  document.getElementById('zoom-pct').textContent='100%';
+}
+
+// ───────────────────────────────────────────────
+//  EVENT LISTENERS
+// ───────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input',e=>{
+  searchQ=e.target.value.trim();
+  document.getElementById('clear-btn').style.display=searchQ?'block':'none';
+  updateOpacity();
+});
+document.getElementById('clear-btn').addEventListener('click',()=>{
+  searchQ='';document.getElementById('search-input').value='';
+  document.getElementById('clear-btn').style.display='none';updateOpacity();
+});
+document.getElementById('d-close').addEventListener('click',()=>selectNode(null));
+document.getElementById('btn-zi').addEventListener('click',()=>svg.transition().duration(220).call(zoom.scaleBy,1.5));
+document.getElementById('btn-zo').addEventListener('click',()=>svg.transition().duration(220).call(zoom.scaleBy,1/1.5));
+document.getElementById('reset-btn').addEventListener('click',doReset);
+document.getElementById('leg-toggle').addEventListener('click',()=>{
+  legendOpen=!legendOpen;
+  document.getElementById('era-list').style.display=legendOpen?'flex':'none';
+  document.getElementById('leg-hint').style.display=legendOpen?'block':'none';
+});
+document.getElementById('lang-btn').addEventListener('click',()=>{
+  lang=lang==='ja'?'en':'ja';
+  applyStrings();
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='+'||e.key==='='||e.key==='ArrowUp'){e.preventDefault();svg.transition().duration(220).call(zoom.scaleBy,1.5);}
+  if(e.key==='-'||e.key==='ArrowDown'){e.preventDefault();svg.transition().duration(220).call(zoom.scaleBy,1/1.5);}
+  if(e.key==='0')doReset();
+  if(e.key==='Escape')selectNode(null);
+});
+
+window.addEventListener('resize',()=>{
+  sim.force('center',d3.forceCenter(W()/2,H()/2)).alpha(0.3).restart();
+});
+
+// ── Init ────────────────────────────────────────
+applyStrings();
+</script>
+</body>
+</html>
