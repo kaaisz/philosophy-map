@@ -1,4 +1,8 @@
-# philosopher-map
+# philosophy-map
+
+## Website
+
+https://kaaisz.github.io/philosophy-map/
 
 ## What's this?
 
