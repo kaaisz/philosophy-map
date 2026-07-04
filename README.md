@@ -12,11 +12,18 @@ Basically, this is just for myself who likes to read philosophy from time to tim
 
 ## Usage
 
-- Philosopher's profile will show up when you hovered on each markers. You can toggle subjects on left bottom to filter them.
+- Philosopher's profile will show up when you clicked/tapped on each markers. You can toggle subjects on left bottom (or bottom on mobile) to filter them.
 
 - Scroll up/down enables zooming in/out. Moving from side to side is also possible with drag and drop.
 
-- Japanese, Chinese and Korean language available. (note: machine-translated)
+- Available language (note: machine-translated based on Japanese)
+    - English
+    - 日本語
+    - 中文
+    - 한국어
+    - Español
+    - Français
+    - Português
 
 ---
 
