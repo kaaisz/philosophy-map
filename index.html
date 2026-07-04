@@ -66,6 +66,8 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 #d-works-list{list-style:none;display:flex;flex-direction:column;gap:5px}
 #d-works-list li{color:#C9CCD6;font-size:11.5px;line-height:1.4;font-style:italic;padding-left:13px;position:relative}
 #d-works-list li::before{content:'•';position:absolute;left:2px;color:#6E7688;font-style:normal}
+/* Allow selecting/copying the detail-panel text (name, dates, bio, works) */
+#d-name,#d-meta,#d-summary,#d-works-title,#d-works-list li{-webkit-user-select:text;user-select:text;cursor:text}
 #d-rel-title{color:#9AA0B2;font-size:10px;margin-top:13px;margin-bottom:5px}
 #d-rels{display:flex;flex-direction:column;gap:5px}
 .rel-row{background:rgba(255,255,255,.03);border:1px solid #232838;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;width:100%}
