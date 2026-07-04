@@ -1,6 +1,6 @@
 # philosopher-map
 
-## What's that?
+## What's this?
 
 This is the map to see the connections of some famous philosopher from Platon, Aristotle, Heidegger, to relatively recent philosophers and some other people around.
 
@@ -15,5 +15,9 @@ Basically, this is just for myself who likes to read philosophy from time to tim
 - Japanese, Chinese and Korean language available. (note: machine-translated)
 
 ---
+
+## Disclaimer
+
+**This website is vibe-coded with Claude Code**. As ai can make mistakes, and I haven't been able to investigate all the sources fully, some information or expression (in the other language partiuclarly other than Japanese) might be wrong.
 
 Support me on [Buy me a coffee](http://buymeacoffee.com/kaaisz).
