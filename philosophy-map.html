@@ -15,47 +15,53 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 /* ── Title ── */
 #title{position:absolute;top:14px;left:14px;pointer-events:none}
 #title h1{color:#EDE7D6;font-size:17px;letter-spacing:.05em}
-#title p{color:#8A8F9E;font-size:10.5px;margin-top:2px}
+#title p{color:#9AA0B2;font-size:10.5px;margin-top:2px}
 
 /* ── Controls ── */
 #controls{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .ctrl-pill{background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:999px}
 #search-wrap{display:flex;align-items:center;gap:7px;padding:6px 13px}
 #search-input{background:transparent;border:none;outline:none;color:#EDE7D6;font-family:inherit;font-size:13px;width:148px}
-#search-input::placeholder{color:#5C6173}
-#clear-btn{background:none;border:none;cursor:pointer;color:#8A8F9E;font-size:13px;display:none;padding:0;line-height:1}
+#search-input::placeholder{color:#868CA0}
+#clear-btn{background:none;border:none;cursor:pointer;color:#9AA0B2;font-size:13px;display:none;padding:0;line-height:1}
 #zoom-wrap{display:flex;align-items:center;overflow:hidden}
-.zbtn{background:none;border:none;cursor:pointer;color:#8A8F9E;padding:7px 10px;display:flex;align-items:center;transition:background .15s}
+.zbtn{background:none;border:none;cursor:pointer;color:#9AA0B2;padding:7px 10px;display:flex;align-items:center;transition:background .15s}
 .zbtn:hover{background:rgba(255,255,255,.07)}
-#zoom-pct{color:#8A8F9E;font-family:monospace;font-size:11px;min-width:40px;text-align:center;cursor:default}
+#zoom-pct{color:#9AA0B2;font-family:monospace;font-size:11px;min-width:40px;text-align:center;cursor:default}
 .vd{width:1px;height:18px;background:#2A3142}
-#reset-btn{background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:999px;cursor:pointer;color:#8A8F9E;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:monospace;font-size:11px;letter-spacing:.04em;white-space:nowrap}
+#reset-btn{background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:999px;cursor:pointer;color:#9AA0B2;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:monospace;font-size:11px;letter-spacing:.04em;white-space:nowrap}
 #reset-btn:hover{background:rgba(255,255,255,.07);color:#EDE7D6}
 #lang-select{background:rgba(20,24,36,.88);border:1px solid #2A4A5A;border-radius:999px;cursor:pointer;color:#4FC3E8;padding:7px 26px 7px 12px;font-family:monospace;font-size:11px;letter-spacing:.04em;font-weight:bold;white-space:nowrap;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234FC3E8' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 10px center}
 #lang-select:hover{color:#EDE7D6}
 #lang-select option{background:#141824;color:#EDE7D6;font-weight:normal}
 
 /* ── Legend ── */
-#legend{position:absolute;bottom:14px;left:14px;background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:12px;padding:11px;max-width:240px}
-#leg-toggle{background:none;border:none;cursor:pointer;color:#EDE7D6;font-family:inherit;font-size:11px;font-weight:bold;display:flex;align-items:center;gap:4px;padding:0}
-#era-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
-.era-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;font-family:inherit;padding:0;transition:opacity .15s}
-.era-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.era-lbl{color:#C9CCD6;font-size:10.5px}
-#leg-hint{color:#5C6173;font-size:9px;margin-top:8px;line-height:1.65}
-#leg-hint span{color:#3A405A}
+#legend{position:absolute;bottom:14px;left:14px;background:rgba(20,24,36,.88);border:1px solid #2A3142;border-radius:12px;padding:13px;max-width:316px}
+#leg-toggle{background:none;border:none;cursor:default;color:#EDE7D6;font-family:inherit;font-size:14px;font-weight:bold;display:flex;align-items:center;gap:6px;padding:0}
+#leg-toggle .leg-i{display:none}
+#leg-toggle .leg-chevron{display:none;transition:transform .2s}
+#leg-toggle.open .leg-chevron{transform:rotate(180deg)}
+#era-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.era-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:9px;text-align:left;font-family:inherit;padding:0;transition:opacity .15s}
+.era-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.era-lbl{color:#C9CCD6;font-size:13.5px}
+#leg-hint{margin-top:11px;padding:9px 11px;border:1px solid #303748;border-radius:9px;background:rgba(255,255,255,.03)}
+#leg-hint-title{color:#DDE1EA;font-size:12px;font-weight:bold;letter-spacing:.03em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+#leg-hint-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+#leg-hint-list li{color:#B4BAC9;font-family:monospace;font-size:11px;line-height:1.55;padding-left:13px;position:relative}
+#leg-hint-list li::before{content:'•';position:absolute;left:2px;top:-.5px;color:#7E8598}
 
 /* ── Detail panel ── */
 #detail{position:absolute;top:66px;right:14px;bottom:14px;width:284px;background:rgba(14,17,28,.97);border:1px solid #2A3142;border-radius:12px;padding:15px;overflow-y:auto;display:none}
 #detail.open{display:block}
-#d-close{float:right;background:none;border:none;cursor:pointer;color:#8A8F9E;font-size:16px;line-height:1;padding:0}
+#d-close{float:right;background:none;border:none;cursor:pointer;color:#9AA0B2;font-size:16px;line-height:1;padding:0}
 #d-era{font-size:10px;letter-spacing:.05em;margin-top:4px;clear:right}
 #d-name{color:#EDE7D6;font-size:19px;font-weight:bold;margin-top:3px}
-#d-meta{color:#8A8F9E;font-size:11px;margin-bottom:3px}
+#d-meta{color:#9AA0B2;font-size:11px;margin-bottom:3px}
 #d-summary{color:#C9CCD6;font-size:12px;line-height:1.75;margin-top:7px}
 #d-wiki{display:inline-flex;align-items:center;gap:5px;margin-top:11px;color:#4FC3E8;font-size:11.5px;text-decoration:none;border:1px solid #2A4A5A;border-radius:8px;padding:5px 10px;transition:background .15s}
 #d-wiki:hover{background:rgba(79,195,232,.12)}
-#d-rel-title{color:#8A8F9E;font-size:10px;margin-top:13px;margin-bottom:5px}
+#d-rel-title{color:#9AA0B2;font-size:10px;margin-top:13px;margin-bottom:5px}
 #d-rels{display:flex;flex-direction:column;gap:5px}
 .rel-row{background:rgba(255,255,255,.03);border:1px solid #232838;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s;width:100%}
 .rel-row:hover{background:rgba(255,255,255,.07)}
@@ -67,18 +73,22 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 @media(max-width:640px){
   #title h1{font-size:14px}
   #title p{font-size:9.5px}
-  #controls{top:10px;right:10px;gap:5px}
-  #search-input{width:110px}
+  /* Stack the header: title on top, controls as a full-width toolbar below it */
+  #controls{top:60px;left:10px;right:10px;gap:6px;justify-content:flex-start;flex-wrap:wrap}
+  #search-wrap{flex:1 1 100%}
+  #search-input{width:100%}
+  #leg-toggle{cursor:pointer}
+  #leg-toggle .leg-chevron{display:block}
   #detail{
     position:fixed;top:auto;right:0;left:0;bottom:0;width:100%;
     max-height:58vh;border-radius:12px 12px 0 0;border-bottom:none
   }
-  #legend{max-width:200px;padding:9px;bottom:10px;left:10px}
-  .era-lbl{font-size:9.5px}
+  #legend{max-width:252px;padding:11px;bottom:10px;left:10px}
+  .era-lbl{font-size:12.5px}
 }
 @media(max-width:400px){
   #search-wrap{padding:5px 10px}
-  #search-input{width:90px;font-size:12px}
+  #search-input{font-size:12px}
   #zoom-pct{min-width:34px;font-size:10px}
   .zbtn{padding:6px 8px}
 }
@@ -95,7 +105,7 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 
 <div id="controls">
   <div class="ctrl-pill" id="search-wrap">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA0B2" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input id="search-input" autocomplete="off"/>
     <button id="clear-btn">✕</button>
   </div>
@@ -111,7 +121,7 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
     </button>
   </div>
   <button id="reset-btn">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8F9E" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA0B2" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
     <span id="t-reset">リセット</span>
   </button>
   <select id="lang-select" title="Language">
@@ -126,9 +136,12 @@ body{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho",serif;user-select:no
 </div>
 
 <div id="legend">
-  <button id="leg-toggle">ℹ <span id="t-leg-title">時代区分</span></button>
+  <button id="leg-toggle"><span class="leg-i">ℹ</span><svg class="leg-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg><span id="t-leg-title">時代区分</span></button>
   <div id="era-list"></div>
-  <div id="leg-hint"><span id="t-leg-hint"></span></div>
+  <div id="leg-hint">
+    <div id="leg-hint-title"></div>
+    <ul id="leg-hint-list"></ul>
+  </div>
 </div>
 
 <div id="detail">
@@ -186,6 +199,7 @@ const ERAS=[
   {id:'poststructuralism', ja:'構造主義・ポスト構造主義',   en:'Structuralism & Post-structuralism',   color:'#E08FB0'},
   {id:'analytic',          ja:'分析哲学・政治哲学',         en:'Analytic & Political Philosophy',       color:'#82A6C9'},
   {id:'cognitive_science', ja:'認知科学・システム理論',     en:'Cognitive Science & Systems Theory',   color:'#4FC3E8'},
+  {id:'eastern',           ja:'東洋哲学',                  en:'Eastern Philosophy',                    color:'#C0466E'},
 ];
 
 const NODES=[
@@ -438,6 +452,38 @@ const NODES=[
   {id:'luhmann',     name:'ルーマン',             en:'Luhmann',          life:'1927–1998',    era:'cognitive_science',
    ja:'オートポイエーシス概念を社会システム理論に応用。ハーバーマスとの論争で知られる。',
    summary_en:'Applied autopoiesis to social systems: society self-produces through communication, not individuals. Debated Habermas on rationality.'},
+  // 近現代（大陸・批判理論）追加
+  {id:'bergson',     name:'ベルクソン',          en:'Henri Bergson',    life:'1859–1941',    era:'phenomenology',
+   ja:'「純粋持続」と「エラン・ヴィタール（生の躍動）」。時間・記憶・生命を知性ではなく直観によって捉える生の哲学。',
+   summary_en:'"Pure duration" and the élan vital. A philosophy of life grasping time, memory, and becoming through intuition rather than the intellect.'},
+  {id:'fanon',       name:'ファノン',            en:'Frantz Fanon',     life:'1925–1961',    era:'phenomenology',
+   ja:'『黒い皮膚・白い仮面』『地に呪われたる者』。植民地支配と人種を身体の現象学と実存主義から分析した脱植民地思想の古典。',
+   summary_en:'Black Skin, White Masks; The Wretched of the Earth. Analyzed colonialism and race through a phenomenology of the body and existentialism—a founding text of postcolonial thought.'},
+  {id:'gramsci',     name:'グラムシ',            en:'Antonio Gramsci',  life:'1891–1937',    era:'frankfurt',
+   ja:'『獄中ノート』。文化的「ヘゲモニー」概念で支配の同意調達を分析した西欧マルクス主義の理論家。',
+   summary_en:'Prison Notebooks. His concept of cultural "hegemony"—rule secured through consent—reshaped Western Marxism and later cultural studies.'},
+  {id:'agamben',     name:'アガンベン',          en:'Giorgio Agamben',  life:'1942–',        era:'poststructuralism',
+   ja:'『ホモ・サケル』。例外状態と「剥き出しの生」から主権と生政治を問い直すイタリアの思想家。',
+   summary_en:'Homo Sacer. Rethinks sovereignty and biopolitics through the "state of exception" and "bare life," extending Foucault, Benjamin, and Arendt.'},
+  {id:'butler',      name:'バトラー',            en:'Judith Butler',    life:'1956–',        era:'poststructuralism',
+   ja:'『ジェンダー・トラブル』。ジェンダーを反復的な「遂行（パフォーマティヴィティ）」として捉え、フェミニズム・クィア理論を刷新。',
+   summary_en:'Gender Trouble. Reconceived gender as repeated "performativity," transforming feminist and queer theory. Draws on Foucault, Beauvoir, Hegel, and Derrida.'},
+  // 東洋哲学 追加
+  {id:'confucius',   name:'孔子',                en:'Confucius',        life:'前551–前479',  era:'eastern',
+   ja:'儒家の祖。『論語』。仁と礼による人倫と徳治を説き、東アジア思想の根幹をなす。',
+   summary_en:'Founder of Confucianism. The Analects. Taught ren (humaneness) and ritual propriety as the basis of ethics and government—the bedrock of East Asian thought.'},
+  {id:'laozi',       name:'老子',                en:'Laozi',            life:'前6世紀頃',    era:'eastern',
+   ja:'道家の祖とされる。『道徳経』。無為自然と「道（タオ）」を説く。儒家と対をなす中国思想のもう一つの極。',
+   summary_en:'Traditional founder of Daoism. The Tao Te Ching. Teaches wu wei (effortless action) and the Dao—the counterpole to Confucianism in Chinese thought.'},
+  {id:'nagarjuna',   name:'龍樹',                en:'Nāgārjuna',        life:'150–250頃',    era:'eastern',
+   ja:'大乗仏教中観派の祖。「空（śūnyatā）」と縁起の論理で一切の実体性を否定。仏教哲学最大の論師。',
+   summary_en:'Founder of the Madhyamaka school of Mahāyāna Buddhism. His logic of emptiness (śūnyatā) and dependent origination denies all inherent existence—Buddhism\'s greatest philosopher.'},
+  {id:'dogen',       name:'道元',                en:'Dōgen',            life:'1200–1253',    era:'eastern',
+   ja:'曹洞宗の祖。『正法眼蔵』。只管打坐と「修証一等」、有時（存在＝時間）の思想を説いた日本を代表する禅思想家。',
+   summary_en:'Founder of Sōtō Zen. Shōbōgenzō. Taught "just sitting" (shikantaza), the unity of practice and realization, and being-time (uji)—Japan\'s foremost Zen thinker.'},
+  {id:'nishida',     name:'西田幾多郎',          en:'Nishida Kitarō',   life:'1870–1945',    era:'eastern',
+   ja:'京都学派の祖。『善の研究』。「純粋経験」と「絶対無の場所」により禅と西洋哲学を架橋した近代日本哲学の父。',
+   summary_en:'Founder of the Kyoto School. An Inquiry into the Good. His "pure experience" and "place of absolute nothingness" bridged Zen and Western philosophy—father of modern Japanese philosophy.'},
 ];
 
 const EDGES=[
@@ -499,6 +545,20 @@ const EDGES=[
   ['husserl','varela','influence'],['merleau_ponty','varela','influence'],
   ['maturana','varela','teacher'],['maturana','luhmann','influence'],
   ['habermas','luhmann','critique'],['aristotle','maturana','influence'],
+  // 追加ノードの関係
+  ['james','bergson','influence'],['bergson','merleau_ponty','influence'],
+  ['bergson','deleuze','influence'],['bergson','nishida','influence'],
+  ['hegel','fanon','influence'],['sartre','fanon','influence'],
+  ['merleau_ponty','fanon','influence'],['marx','fanon','influence'],
+  ['marx','gramsci','influence'],['hegel','gramsci','influence'],
+  ['foucault','agamben','influence'],['heidegger','agamben','influence'],
+  ['benjamin','agamben','influence'],['arendt','agamben','influence'],
+  ['foucault','butler','influence'],['beauvoir','butler','influence'],
+  ['derrida','butler','influence'],['hegel','butler','influence'],
+  ['laozi','confucius','influence'],['laozi','dogen','influence'],
+  ['nagarjuna','dogen','influence'],['dogen','nishida','influence'],
+  ['nagarjuna','nishida','influence'],['james','nishida','influence'],
+  ['nagarjuna','schopenhauer','influence'],['laozi','heidegger','influence'],
 ].map(([s,t,type])=>({source:s,target:t,type}));
 
 // ───────────────────────────────────────────────
@@ -524,6 +584,9 @@ const LANGS=[{code:'en',label:'English'},{code:'ja',label:'日本語'},{code:'zh
 function nodeName(n){if(lang==='ja')return n.name;if(lang==='en')return n.en;return (I18N[n.id]&&I18N[n.id][lang]&&I18N[n.id][lang].name)||n.en;}
 function nodeSummary(n){if(lang==='ja')return n.ja;if(lang==='en')return n.summary_en||n.ja;return (I18N[n.id]&&I18N[n.id][lang]&&I18N[n.id][lang].s)||n.summary_en||n.ja;}
 function eraLabel(era){if(lang==='ja')return era.ja;if(lang==='en')return era.en;return (ERA_I18N[era.id]&&ERA_I18N[era.id][lang])||era.en;}
+
+Object.assign(I18N,{"bergson": {"zh": {"name": "柏格森", "s": "\"绵延\"与生命冲动。一种生命哲学，主张借助直觉而非理智来把握时间、记忆与生成流变。"}, "ko": {"name": "베르그송", "s": "'순수 지속'과 생의 약동(엘랑 비탈). 시간, 기억, 생성을 지성이 아니라 직관으로 파악하는 생의 철학."}, "es": {"name": "Henri Bergson", "s": "La \"duración pura\" y el élan vital. Una filosofía de la vida que capta el tiempo, la memoria y el devenir mediante la intuición y no el intelecto."}, "fr": {"name": "Henri Bergson", "s": "La « durée pure » et l'élan vital. Une philosophie de la vie saisissant le temps, la mémoire et le devenir par l'intuition plutôt que par l'intelligence."}, "pt": {"name": "Henri Bergson", "s": "A \"duração pura\" e o élan vital. Uma filosofia da vida que apreende o tempo, a memória e o devir pela intuição, e não pelo intelecto."}}, "fanon": {"zh": {"name": "法农", "s": "《黑皮肤，白面具》《全世界受苦的人》。以身体现象学与存在主义剖析殖民主义与种族——后殖民思想的奠基之作。"}, "ko": {"name": "파농", "s": "『검은 피부, 하얀 가면』, 『대지의 저주받은 사람들』. 신체의 현상학과 실존주의로 식민주의와 인종을 분석한 탈식민주의 사상의 창시적 저작."}, "es": {"name": "Frantz Fanon", "s": "Piel negra, máscaras blancas; Los condenados de la tierra. Analizó el colonialismo y la raza desde una fenomenología del cuerpo y el existencialismo—texto fundacional del pensamiento poscolonial."}, "fr": {"name": "Frantz Fanon", "s": "Peau noire, masques blancs ; Les Damnés de la terre. Il analysa le colonialisme et la race par une phénoménologie du corps et l'existentialisme — texte fondateur de la pensée postcoloniale."}, "pt": {"name": "Frantz Fanon", "s": "Pele Negra, Máscaras Brancas; Os Condenados da Terra. Analisou o colonialismo e a raça por uma fenomenologia do corpo e o existencialismo—texto fundador do pensamento pós-colonial."}}, "gramsci": {"zh": {"name": "葛兰西", "s": "《狱中札记》。他关于文化\"霸权\"——通过同意而非强制来维系统治——的概念重塑了西方马克思主义与后来的文化研究。"}, "ko": {"name": "그람시", "s": "『옥중수고』. 동의를 통해 확보되는 지배인 문화적 '헤게모니' 개념으로 서구 마르크스주의와 훗날의 문화 연구를 재편했다."}, "es": {"name": "Antonio Gramsci", "s": "Cuadernos de la cárcel. Su concepto de \"hegemonía\" cultural—el dominio logrado por consenso—renovó el marxismo occidental y, luego, los estudios culturales."}, "fr": {"name": "Antonio Gramsci", "s": "Cahiers de prison. Son concept d'« hégémonie » culturelle — une domination assurée par le consentement — refaçonna le marxisme occidental puis les études culturelles."}, "pt": {"name": "Antonio Gramsci", "s": "Cadernos do Cárcere. Seu conceito de \"hegemonia\" cultural—o domínio garantido pelo consentimento—reformulou o marxismo ocidental e depois os estudos culturais."}}, "agamben": {"zh": {"name": "阿甘本", "s": "《神圣人》。以\"例外状态\"与\"赤裸生命\"重思主权与生命政治，延续福柯、本雅明与阿伦特的思路。"}, "ko": {"name": "아감벤", "s": "『호모 사케르』. '예외 상태'와 '벌거벗은 생명'을 통해 주권과 생명정치를 재사유하며 푸코, 벤야민, 아렌트를 확장했다."}, "es": {"name": "Giorgio Agamben", "s": "Homo Sacer. Repiensa la soberanía y la biopolítica a través del \"estado de excepción\" y la \"nuda vida\", prolongando a Foucault, Benjamin y Arendt."}, "fr": {"name": "Giorgio Agamben", "s": "Homo Sacer. Il repense la souveraineté et la biopolitique à travers l'« état d'exception » et la « vie nue », prolongeant Foucault, Benjamin et Arendt."}, "pt": {"name": "Giorgio Agamben", "s": "Homo Sacer. Repensa a soberania e a biopolítica pelo \"estado de exceção\" e a \"vida nua\", estendendo Foucault, Benjamin e Arendt."}}, "butler": {"zh": {"name": "巴特勒", "s": "《性别麻烦》。将性别重构为反复的\"操演\"，变革了女性主义与酷儿理论。汲取福柯、波伏娃、黑格尔与德里达。"}, "ko": {"name": "버틀러", "s": "『젠더 트러블』. 젠더를 반복되는 '수행성'으로 재개념화해 페미니즘과 퀴어 이론을 변혁했다. 푸코, 보부아르, 헤겔, 데리다에 기댄다."}, "es": {"name": "Judith Butler", "s": "El género en disputa. Reconcibió el género como \"performatividad\" repetida, transformando la teoría feminista y queer. Bebe de Foucault, Beauvoir, Hegel y Derrida."}, "fr": {"name": "Judith Butler", "s": "Trouble dans le genre. Elle repensa le genre comme « performativité » répétée, transformant la théorie féministe et queer. S'appuie sur Foucault, Beauvoir, Hegel et Derrida."}, "pt": {"name": "Judith Butler", "s": "Problemas de Gênero. Reconcebeu o gênero como \"performatividade\" repetida, transformando a teoria feminista e queer. Recorre a Foucault, Beauvoir, Hegel e Derrida."}}, "confucius": {"zh": {"name": "孔子", "s": "儒家创始人。《论语》。以仁与礼为伦理和政治之本——东亚思想的基石。"}, "ko": {"name": "공자", "s": "유교의 창시자. 『논어』. 인(仁)과 예를 윤리와 정치의 토대로 가르친 동아시아 사상의 초석."}, "es": {"name": "Confucio", "s": "Fundador del confucianismo. Las Analectas. Enseñó el ren (humanidad) y el decoro ritual como base de la ética y el gobierno—cimiento del pensamiento de Asia Oriental."}, "fr": {"name": "Confucius", "s": "Fondateur du confucianisme. Les Entretiens. Il enseigna le ren (humanité) et la bienséance rituelle comme fondement de l'éthique et du gouvernement — socle de la pensée est-asiatique."}, "pt": {"name": "Confúcio", "s": "Fundador do confucionismo. Os Analectos. Ensinou o ren (humanidade) e a propriedade ritual como base da ética e do governo—o alicerce do pensamento do Leste Asiático."}}, "laozi": {"zh": {"name": "老子", "s": "道家传统创始人。《道德经》。倡导无为与道——中国思想中与儒家相对的一极。"}, "ko": {"name": "노자", "s": "도교의 전통적 창시자. 『도덕경』. 무위(無爲)와 도(道)를 가르친, 중국 사상에서 유교의 대극점."}, "es": {"name": "Lao-Tsé", "s": "Fundador tradicional del taoísmo. El Tao Te Ching. Enseña el wu wei (acción sin esfuerzo) y el Dao—el contrapunto del confucianismo en el pensamiento chino."}, "fr": {"name": "Lao Tseu", "s": "Fondateur traditionnel du taoisme. Le Tao Tö King. Il enseigne le wu wei (non-agir) et le Tao — le contrepoint du confucianisme dans la pensée chinoise."}, "pt": {"name": "Lao Tsé", "s": "Fundador tradicional do taoismo. O Tao Te Ching. Ensina o wu wei (ação sem esforço) e o Dao—o contraponto ao confucionismo no pensamento chinês."}}, "nagarjuna": {"zh": {"name": "龙树", "s": "大乘佛教中观学派创始人。其空性与缘起的逻辑否定一切自性存在——佛教最伟大的哲学家。"}, "ko": {"name": "나가르주나", "s": "대승불교 중관학파의 창시자. 공(空)과 연기의 논리로 모든 자성적 존재를 부정한, 불교 최고의 철학자."}, "es": {"name": "Nāgārjuna", "s": "Fundador de la escuela Madhyamaka del budismo mahāyāna. Su lógica de la vacuidad (śūnyatā) y el origen dependiente niega toda existencia inherente—el mayor filósofo del budismo."}, "fr": {"name": "Nāgārjuna", "s": "Fondateur de l'école Madhyamaka du bouddhisme Mahāyāna. Sa logique de la vacuité (śūnyatā) et de la coproduction conditionnée nie toute existence propre — le plus grand philosophe du bouddhisme."}, "pt": {"name": "Nagarjuna", "s": "Fundador da escola Madhyamaka do budismo Mahayana. Sua lógica da vacuidade (shunyata) e da origem dependente nega toda existência inerente—o maior filósofo do budismo."}}, "dogen": {"zh": {"name": "道元", "s": "曹洞宗创始人。《正法眼藏》。倡导\"只管打坐\"、修证一如与有时——日本首屈一指的禅宗思想家。"}, "ko": {"name": "도겐", "s": "조동종의 창시자. 『정법안장』. 지관타좌(只管打坐), 수증일여, 유시(有時)를 가르친 일본 최고의 선 사상가."}, "es": {"name": "Dōgen", "s": "Fundador del zen Sōtō. Shōbōgenzō. Enseñó el \"solo sentarse\" (shikantaza), la unidad de práctica y realización, y el ser-tiempo (uji)—máximo pensador zen de Japón."}, "fr": {"name": "Dōgen", "s": "Fondateur du zen Sōtō. Shōbōgenzō. Il enseigna le « simplement s'asseoir » (shikantaza), l'unité de la pratique et de l'éveil, et l'être-temps (uji) — le plus grand penseur zen du Japon."}, "pt": {"name": "Dogen", "s": "Fundador do Zen Sōtō. Shōbōgenzō. Ensinou o \"apenas sentar\" (shikantaza), a unidade de prática e realização, e o ser-tempo (uji)—o maior pensador Zen do Japão."}}, "nishida": {"zh": {"name": "西田几多郎", "s": "京都学派创始人。《善的研究》。其\"纯粹经验\"与\"绝对无之场所\"沟通了禅与西方哲学——现代日本哲学之父。"}, "ko": {"name": "니시다 기타로", "s": "교토학파의 창시자. 『선의 연구』. '순수 경험'과 '절대무의 장소'로 선과 서양 철학을 잇다—근대 일본 철학의 아버지."}, "es": {"name": "Nishida Kitaro", "s": "Fundador de la Escuela de Kioto. Indagación sobre el bien. Su \"experiencia pura\" y su \"lugar de la nada absoluta\" unieron el zen y la filosofía occidental—padre de la filosofía japonesa moderna."}, "fr": {"name": "Nishida Kitarō", "s": "Fondateur de l'école de Kyoto. Essai sur le bien. Son « expérience pure » et son « lieu du néant absolu » unirent le zen et la philosophie occidentale — père de la philosophie japonaise moderne."}, "pt": {"name": "Nishida Kitarō", "s": "Fundador da Escola de Kyoto. Um Estudo sobre o Bem. Sua \"experiência pura\" e o \"lugar do nada absoluto\" uniram o Zen e a filosofia ocidental—pai da filosofia japonesa moderna."}}});
+ERA_I18N.eastern={"zh": "东方哲学", "ko": "동양 철학", "es": "Filosofía oriental", "fr": "Philosophie orientale", "pt": "Filosofia Oriental"};
 
 // ───────────────────────────────────────────────
 //  STATE
@@ -666,6 +729,7 @@ function updateOpacity(){
 }
 
 const WIKI_LABEL={en:'View on Wikipedia',ja:'Wikipediaで見る',zh:'在维基百科上查看',ko:'위키백과에서 보기',es:'Ver en Wikipedia',fr:'Voir sur Wikipédia',pt:'Ver na Wikipédia'};
+const HINT_TITLE={en:'Tips',ja:'ヒント',zh:'提示',ko:'도움말',es:'Consejos',fr:'Astuces',pt:'Dicas'};
 function updateDetail(){
   const panel=document.getElementById('detail');
   if(!selectedId){panel.classList.remove('open');return;}
@@ -719,6 +783,7 @@ function buildLegend(){
   });
   document.getElementById('era-list').style.display=legendOpen?'flex':'none';
   document.getElementById('leg-hint').style.display=legendOpen?'block':'none';
+  document.getElementById('leg-toggle').classList.toggle('open',legendOpen);
 }
 
 function applyStrings(){
@@ -727,7 +792,16 @@ function applyStrings(){
   document.getElementById('t-stats').textContent=s.stats(NODES.length,EDGES.length);
   document.getElementById('search-input').placeholder=s.searchPh;
   document.getElementById('t-leg-title').textContent=s.legTitle;
-  document.getElementById('t-leg-hint').textContent=s.hint;
+  document.getElementById('leg-hint-title').textContent='💡 '+(HINT_TITLE[lang]||'Tips');
+  const hintList=document.getElementById('leg-hint-list');
+  hintList.innerHTML='';
+  s.hint.split('\n').forEach(line=>{
+    const t=line.trim();
+    if(!t)return;
+    const li=document.createElement('li');
+    li.textContent=t;
+    hintList.appendChild(li);
+  });
   document.getElementById('t-reset').textContent=s.reset;
   document.getElementById('lang-select').value=lang;
   document.documentElement.lang=lang;
@@ -761,9 +835,11 @@ document.getElementById('btn-zi').addEventListener('click',()=>svg.transition().
 document.getElementById('btn-zo').addEventListener('click',()=>svg.transition().duration(220).call(zoom.scaleBy,1/1.5));
 document.getElementById('reset-btn').addEventListener('click',doReset);
 document.getElementById('leg-toggle').addEventListener('click',()=>{
+  if(window.innerWidth>640)return; // desktop: legend is static, not collapsible
   legendOpen=!legendOpen;
   document.getElementById('era-list').style.display=legendOpen?'flex':'none';
   document.getElementById('leg-hint').style.display=legendOpen?'block':'none';
+  document.getElementById('leg-toggle').classList.toggle('open',legendOpen);
 });
 document.getElementById('lang-select').addEventListener('change',e=>{
   lang=e.target.value;
@@ -779,6 +855,7 @@ document.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('resize',()=>{
+  if(window.innerWidth>640&&!legendOpen){legendOpen=true;buildLegend();}
   if(introDone)fitToView(70,0);
 });
 
